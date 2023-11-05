@@ -12,6 +12,9 @@ def synthetic_data(w, b, num_examples):  #@save
     y += torch.normal(0, 0.01, y.shape)
     return X, y.reshape((-1, 1))
     #-1表示编译器自己根据数据大小定义行数
+
+
+
 true_w = torch.tensor([2, -3.4])
 true_b = 4.2
 features, labels = synthetic_data(true_w, true_b, 1000)
