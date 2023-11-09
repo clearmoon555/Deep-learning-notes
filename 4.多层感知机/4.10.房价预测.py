@@ -139,9 +139,11 @@ all_features.shape
 
 #提取train_data的行数
 n_train = train_data.shape[0]
+#.values将所选的DataFrame子集转换为NumPy数组
 train_features = torch.tensor(all_features[:n_train].values, dtype=torch.float32)
 test_features = torch.tensor(all_features[n_train:].values, dtype=torch.float32)
 train_labels = torch.tensor(
+    #SalePrice是train_data中的一个列
     train_data.SalePrice.values.reshape(-1, 1), dtype=torch.float32)
 
 
@@ -159,9 +161,11 @@ def get_net():
 
 def log_rmse(net, features, labels):
     # 为了在取对数时进一步稳定该值，将小于1的值设置为1
+    #clamp用于限制张量中的值在指定范围内
     clipped_preds = torch.clamp(net(features), 1, float('inf'))
     rmse = torch.sqrt(loss(torch.log(clipped_preds),
                            torch.log(labels)))
+    #item()将其转换为一个标量
     return rmse.item()
 
 
@@ -180,6 +184,7 @@ def train(net, train_features, train_labels, test_features, test_labels,
             l = loss(net(X), y)
             l.backward()
             optimizer.step()
+        #将每轮训练后计算得到的均方根对数误差添加到 train_ls 列表
         train_ls.append(log_rmse(net, train_features, train_labels))
         if test_labels is not None:
             test_ls.append(log_rmse(net, test_features, test_labels))
@@ -192,6 +197,7 @@ def get_k_fold_data(k, i, X, y):
     fold_size = X.shape[0] // k
     X_train, y_train = None, None
     for j in range(k):
+        #用slice来创建一个切片对象，指定起始位置、结束位置和步长
         idx = slice(j * fold_size, (j + 1) * fold_size)
         X_part, y_part = X[idx, :], y[idx]
         if j == i:
@@ -199,6 +205,7 @@ def get_k_fold_data(k, i, X, y):
         elif X_train is None:
             X_train, y_train = X_part, y_part
         else:
+            #torch.cat(..., 0)用于在维度0（行）上拼接张量
             X_train = torch.cat([X_train, X_part], 0)
             y_train = torch.cat([y_train, y_part], 0)
     return X_train, y_train, X_valid, y_valid
@@ -240,10 +247,13 @@ def train_and_pred(train_features, test_features, train_labels, test_data,
              ylabel='log rmse', xlim=[1, num_epochs], yscale='log')
     print(f'训练log rmse：{float(train_ls[-1]):f}')
     # 将网络应用于测试集。
+    #detach将预测结果从计算图中分离，使其不再与梯度计算相关
     preds = net(test_features).detach().numpy()
     # 将其重新格式化以导出到Kaggle
     test_data['SalePrice'] = pd.Series(preds.reshape(1, -1)[0])
     submission = pd.concat([test_data['Id'], test_data['SalePrice']], axis=1)
+    #to_csv将数据框 submission 写入到一个CSV文件中
+    #index=False告诉Pandas不要写入数据框的行索引
     submission.to_csv('submission.csv', index=False)
 
 
