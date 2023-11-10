@@ -19,6 +19,7 @@ net = nn.Sequential(
 X = torch.rand(size=(1, 1, 28, 28), dtype=torch.float32)
 for layer in net:
     X = layer(X)
+    #layer.__class__.__name__: 获取当前层的类名
     print(layer.__class__.__name__,'output shape: \t',X.shape)
 
 
@@ -28,7 +29,7 @@ train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size=batch_size)
 
 
 
-def evaluate_accuracy_gpu(net, data_iter, device=None): #@save
+def evaluate_accuracy_gpu(net, data_iter, device=None): 
     """使用GPU计算模型在数据集上的精度"""
     if isinstance(net, nn.Module):
         net.eval()  # 设置为评估模式
@@ -42,6 +43,7 @@ def evaluate_accuracy_gpu(net, data_iter, device=None): #@save
                 # BERT微调所需的（之后将介绍）
                 X = [x.to(device) for x in X]
             else:
+                #将数据 X 移动（转移到）到指定的 PyTorch 设备 device 上
                 X = X.to(device)
             y = y.to(device)
             metric.add(d2l.accuracy(net(X), y), y.numel())
@@ -49,7 +51,6 @@ def evaluate_accuracy_gpu(net, data_iter, device=None): #@save
 
 
 
-#@save
 def train_ch6(net, train_iter, test_iter, num_epochs, lr, device):
     """用GPU训练模型(在第六章定义)"""
     def init_weights(m):
