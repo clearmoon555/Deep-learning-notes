@@ -35,6 +35,8 @@ def vgg(conv_arch):
         nn.Linear(4096, 4096), nn.ReLU(), nn.Dropout(0.5),
         nn.Linear(4096, 10))
 
+
+
 net = vgg(conv_arch)
 
 
